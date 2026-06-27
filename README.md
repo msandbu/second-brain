@@ -1,6 +1,6 @@
 # Marius Sandbu — Second Brain
 
-This is my public second brain, a living collection of notes, ideas, and knowledge I've built up over time.
+This is my publicsecond brain (or even my first useful one?), a living collection of notes, ideas, and knowledge I've built up over time.
 
 ## Structure
 
