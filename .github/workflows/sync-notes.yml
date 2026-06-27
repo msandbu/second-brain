@@ -1,0 +1,61 @@
+name: Sync notes to second-brain MCP
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'blogposts/**'
+      - 'talks/**'
+      - 'waysofthinking/**'
+      - 'frameworks/**'
+      - 'me/**'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Sync changed and deleted markdown notes
+        env:
+          WORKER_URL: ${{ secrets.SECOND_BRAIN_WORKER_URL }}
+          SYNC_TOKEN: ${{ secrets.SECOND_BRAIN_SYNC_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Get list of changed files between this commit and the previous one
+          git diff --name-status HEAD~1 HEAD > changed.txt || git diff --name-status $(git hash-object -t tree /dev/null) HEAD > changed.txt
+
+          echo "Changed files:"
+          cat changed.txt
+
+          while IFS=$'\t' read -r status filepath rest; do
+            # Only process .md files in the note folders
+            if [[ "$filepath" != *.md ]]; then
+              continue
+            fi
+            if [[ "$filepath" != blogposts/* && "$filepath" != talks/* && "$filepath" != waysofthinking/* && "$filepath" != frameworks/* && "$filepath" != me/* ]]; then
+              continue
+            fi
+
+            if [[ "$status" == "D" ]]; then
+              echo "Deleting note: $filepath"
+              curl -sf -X POST "${WORKER_URL}/api/notes/sync" \
+                -H "Authorization: Bearer ${SYNC_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -d "{\"path\": \"${filepath}\", \"deleted\": true}"
+            else
+              echo "Syncing note: $filepath"
+              content=$(cat "$filepath" | jq -Rs .)
+              curl -sf -X POST "${WORKER_URL}/api/notes/sync" \
+                -H "Authorization: Bearer ${SYNC_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -d "{\"path\": \"${filepath}\", \"content\": ${content}}"
+            fi
+
+            echo ""
+          done < changed.txt
+
+          echo "Sync complete."
