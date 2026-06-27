@@ -9,6 +9,16 @@ on:
       - 'waysofthinking/**'
       - 'frameworks/**'
       - 'me/**'
+  workflow_dispatch:
+    inputs:
+      full_sync:
+        description: 'Sync all notes (not just changed files)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   sync:
@@ -18,44 +28,63 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Sync changed and deleted markdown notes
+      - name: Sync notes to Cloudflare Worker
         env:
           WORKER_URL: ${{ secrets.SECOND_BRAIN_WORKER_URL }}
           SYNC_TOKEN: ${{ secrets.SECOND_BRAIN_SYNC_TOKEN }}
+          FULL_SYNC: ${{ github.event.inputs.full_sync || 'false' }}
         run: |
           set -euo pipefail
 
-          # Get list of changed files between this commit and the previous one
-          git diff --name-status HEAD~1 HEAD > changed.txt || git diff --name-status $(git hash-object -t tree /dev/null) HEAD > changed.txt
+          echo "WORKER_URL is set: $([[ -n "$WORKER_URL" ]] && echo yes || echo NO)"
+          echo "SYNC_TOKEN is set: $([[ -n "$SYNC_TOKEN" ]] && echo yes || echo NO)"
 
-          echo "Changed files:"
-          cat changed.txt
-
-          while IFS=$'\t' read -r status filepath rest; do
-            # Only process .md files in the note folders
-            if [[ "$filepath" != *.md ]]; then
-              continue
-            fi
-            if [[ "$filepath" != blogposts/* && "$filepath" != talks/* && "$filepath" != waysofthinking/* && "$filepath" != frameworks/* && "$filepath" != me/* ]]; then
-              continue
-            fi
-
-            if [[ "$status" == "D" ]]; then
-              echo "Deleting note: $filepath"
-              curl -sf -X POST "${WORKER_URL}/api/notes/sync" \
-                -H "Authorization: Bearer ${SYNC_TOKEN}" \
-                -H "Content-Type: application/json" \
-                -d "{\"path\": \"${filepath}\", \"deleted\": true}"
-            else
-              echo "Syncing note: $filepath"
-              content=$(cat "$filepath" | jq -Rs .)
-              curl -sf -X POST "${WORKER_URL}/api/notes/sync" \
-                -H "Authorization: Bearer ${SYNC_TOKEN}" \
-                -H "Content-Type: application/json" \
-                -d "{\"path\": \"${filepath}\", \"content\": ${content}}"
-            fi
-
+          sync_file() {
+            local filepath="$1"
+            echo "Syncing: $filepath"
+            content=$(cat "$filepath" | jq -Rs .)
+            curl -sf -X POST "${WORKER_URL}/api/notes/sync" \
+              -H "Authorization: Bearer ${SYNC_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"path\": \"${filepath}\", \"content\": ${content}}"
             echo ""
-          done < changed.txt
+          }
+
+          delete_file() {
+            local filepath="$1"
+            echo "Deleting: $filepath"
+            curl -sf -X POST "${WORKER_URL}/api/notes/sync" \
+              -H "Authorization: Bearer ${SYNC_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"path\": \"${filepath}\", \"deleted\": true}"
+            echo ""
+          }
+
+          if [[ "$FULL_SYNC" == "true" ]]; then
+            echo "=== Full sync of all notes ==="
+            find blogposts talks waysofthinking frameworks me -name '*.md' | while read -r filepath; do
+              sync_file "$filepath"
+            done
+          else
+            echo "=== Incremental sync ==="
+            git diff --name-status HEAD~1 HEAD > changed.txt || \
+              git diff --name-status $(git hash-object -t tree /dev/null) HEAD > changed.txt
+
+            echo "Changed files:"
+            cat changed.txt
+
+            while IFS=$'\t' read -r status filepath rest; do
+              [[ "$filepath" != *.md ]] && continue
+              [[ "$filepath" != blogposts/* && "$filepath" != talks/* && \
+                 "$filepath" != waysofthinking/* && "$filepath" != frameworks/* && \
+                 "$filepath" != me/* ]] && continue
+
+              if [[ "$status" == "D" ]]; then
+                delete_file "$filepath"
+              else
+                sync_file "$filepath"
+              fi
+            done < changed.txt
+          fi
 
           echo "Sync complete."
