@@ -43,21 +43,33 @@ jobs:
             local filepath="$1"
             echo "Syncing: $filepath"
             content=$(cat "$filepath" | jq -Rs .)
-            curl -sf -X POST "${WORKER_URL}/api/notes/sync" \
+            response=$(curl -s -w "\n%{http_code}" -X POST "${WORKER_URL}/api/notes/sync" \
               -H "Authorization: Bearer ${SYNC_TOKEN}" \
               -H "Content-Type: application/json" \
-              -d "{\"path\": \"${filepath}\", \"content\": ${content}}"
-            echo ""
+              -d "{\"path\": \"${filepath}\", \"content\": ${content}}")
+            http_code=$(echo "$response" | tail -1)
+            body=$(echo "$response" | head -n -1)
+            echo "HTTP $http_code: $body"
+            if [[ "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
+              echo "ERROR: Failed to sync $filepath (HTTP $http_code)"
+              exit 1
+            fi
           }
 
           delete_file() {
             local filepath="$1"
             echo "Deleting: $filepath"
-            curl -sf -X POST "${WORKER_URL}/api/notes/sync" \
+            response=$(curl -s -w "\n%{http_code}" -X POST "${WORKER_URL}/api/notes/sync" \
               -H "Authorization: Bearer ${SYNC_TOKEN}" \
               -H "Content-Type: application/json" \
-              -d "{\"path\": \"${filepath}\", \"deleted\": true}"
-            echo ""
+              -d "{\"path\": \"${filepath}\", \"deleted\": true}")
+            http_code=$(echo "$response" | tail -1)
+            body=$(echo "$response" | head -n -1)
+            echo "HTTP $http_code: $body"
+            if [[ "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
+              echo "ERROR: Failed to delete $filepath (HTTP $http_code)"
+              exit 1
+            fi
           }
 
           if [[ "$FULL_SYNC" == "true" ]]; then
