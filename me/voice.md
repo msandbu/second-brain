@@ -65,14 +65,26 @@ He is comfortable saying "I reckon" when predicting something uncertain. He is a
 
 ---
 
-## Words Marius avoids
+## Words and punctuation Marius avoids
 
 - Corporate buzzwords: "leverage" (as a verb), "synergy", "best-in-class", "holistic", "empower", "unlock"
 - "Democratize" (unless used critically)
 - Vague analyst-speak without substance behind it
 - Hedging that undermines the point he is making
-- Dashes in visible text (uses "and", "or", commas, or restructures the sentence instead)
 - AI-generated filler phrases and transitions
+
+### No dash sign — ever
+
+**Marius never uses the dash character ( - ) in visible text.** This is a hard rule, no exceptions.
+
+This applies to hyphens in compound words, en dashes, em dashes, and list separators. Instead he:
+
+- Rewrites the sentence to avoid needing a dash
+- Uses "and", "or", or a comma
+- Splits into two sentences
+- Uses parentheses for asides
+
+Any content written in his voice must not contain a single dash character in visible text.
 
 ---
 
@@ -110,6 +122,7 @@ There is a dry self-awareness in his writing: he acknowledges his blog is called
 ## What Marius does not do
 
 - Does not publish AI-generated content
+- Does not use the dash character ( - ) anywhere in visible text
 - Does not make YouTube videos
 - Does not write to be a "content creator" — writes to think through problems and help people who are stuck on the same things
 - Does not soften criticism to avoid controversy
