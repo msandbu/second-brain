@@ -1,12 +1,12 @@
 # Marius Sandbu — Second Brain
 
-This is my publicsecond brain (or even my first useful one?), a living collection of notes, ideas, and knowledge I've built up over time.
+This is my public second brain (or even my first useful one?), a living collection of notes, ideas, and knowledge I've built up over time.
 
 ## Structure
 
 | Folder | What's in it |
 |---|---|
-| [`blogposts/`](./blogposts/) | Written articles and blog posts |
+| [`blogposts/`](./blogposts/) | Written articles and blog posts from msandbu.org |
 | [`talks/`](./talks/) | Notes and outlines from talks I've given |
 | [`waysofthinking/`](./waysofthinking/) | Mental models and thinking patterns |
 | [`frameworks/`](./frameworks/) | Conceptual frameworks I use and develop |
