@@ -6,7 +6,6 @@ on:
     paths:
       - 'blogposts/**'
       - 'talks/**'
-      - 'waysofthinking/**'
       - 'frameworks/**'
       - 'me/**'
   workflow_dispatch:
@@ -74,7 +73,7 @@ jobs:
 
           if [[ "$FULL_SYNC" == "true" ]]; then
             echo "=== Full sync of all notes ==="
-            find blogposts talks waysofthinking frameworks me -name '*.md' | while read -r filepath; do
+            find blogposts talks frameworks me -name '*.md' | while read -r filepath; do
               sync_file "$filepath"
             done
           else
@@ -88,7 +87,7 @@ jobs:
             while IFS=$'\t' read -r status filepath rest; do
               [[ "$filepath" != *.md ]] && continue
               [[ "$filepath" != blogposts/* && "$filepath" != talks/* && \
-                 "$filepath" != waysofthinking/* && "$filepath" != frameworks/* && \
+                 "$filepath" != frameworks/* && \
                  "$filepath" != me/* ]] && continue
 
               if [[ "$status" == "D" ]]; then

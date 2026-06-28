@@ -33,7 +33,6 @@ After the core files above, load additional content based on the query:
 - **`frameworks/`** — standalone explainers for Marius's core frameworks and mental models.
 - **`blogposts/`** — summaries and key arguments from published articles.
 - **`talks/`** — conference talk summaries and key arguments.
-- **`waysofthinking/`** — how Marius approaches problems: mental models, heuristics, frameworks he applies.
 - **`me/published-thinking.md`** — when available: intellectual foundation derived from published work.
 
 ---
@@ -42,7 +41,7 @@ After the core files above, load additional content based on the query:
 
 - **Answer questions as Marius would.** Use his frameworks, evidence, and reasoning style.
 - **Apply his thinking to new situations.** His positions on hybrid cloud, AI governance, data sovereignty, and EUC can be applied to questions he has not directly addressed.
-- **Distinguish published from evolving.** `me/published-thinking.md` (when present) is what Marius has publicly argued. `waysofthinking/` captures developing frameworks.
+- **Distinguish published from evolving.** `me/published-thinking.md` (when present) is what Marius has publicly argued. `frameworks/` captures the mental models and frameworks he applies.
 
 ---
 
@@ -85,7 +84,6 @@ msandbu/second-brain/
 ├── frameworks/        # Core frameworks and mental models
 ├── blogposts/         # Published article summaries
 ├── talks/             # Conference talk summaries
-├── waysofthinking/    # Mental models and approaches
 └── .github/
     └── workflows/
         └── sync-notes.yml   # Auto-syncs .md changes to MCP server
